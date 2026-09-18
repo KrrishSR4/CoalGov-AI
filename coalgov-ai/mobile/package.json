@@ -1,6 +1,6 @@
 {
   "name":"coalgov-field", "version":"1.0.0", "private":true, "main":"index.ts",
   "scripts":{"start":"expo start","android":"expo run:android","ios":"expo run:ios","typecheck":"tsc --noEmit","export:android":"expo export --platform android"},
-  "dependencies":{"expo":"~54.0.0","react":"19.1.0","react-native":"0.81.5","expo-crypto":"~15.0.7","expo-file-system":"~19.0.17","expo-image-picker":"~17.0.8","expo-location":"~19.0.7","expo-secure-store":"~15.0.7","expo-sqlite":"~16.0.9","expo-status-bar":"~3.0.8","@react-native-community/netinfo":"11.4.1","react-native-safe-area-context":"~5.6.0"},
+  "dependencies":{"expo":"~57.0.24","react":"19.1.0","react-native":"0.81.5","expo-crypto":"~15.0.7","expo-file-system":"~19.0.17","expo-image-picker":"~17.0.8","expo-location":"~19.0.7","expo-secure-store":"~15.0.7","expo-sqlite":"~16.0.9","expo-status-bar":"~3.0.8","@react-native-community/netinfo":"11.4.1","react-native-safe-area-context":"~5.6.0"},
   "devDependencies":{"@types/react":"~19.1.10","typescript":"~5.9.2"}
 }

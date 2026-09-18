@@ -20,7 +20,7 @@ def login(data: Login, response: Response, db=Depends(get_db)):
     audit(db, user, "auth.login", user.id)
     db.commit()
     response.set_cookie("coalgov_session", token, httponly=True, secure=settings.cookie_secure,
-                        samesite="strict", max_age=settings.token_minutes * 60, path="/")
+                        samesite="none", max_age=settings.token_minutes * 60, path="/")
     return {"access_token": token, "token_type": "bearer", "user": public_user(user)}
 
 

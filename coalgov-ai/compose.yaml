@@ -1,0 +1,90 @@
+name: coalgov
+x-backend: &backend
+  build: ./backend
+  env_file: .env
+  environment: &backend-env
+    DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-coalgov}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-coalgov}
+    REDIS_URL: redis://redis:6379/0
+    UPLOAD_DIR: /app/data/uploads
+  volumes: [evidence:/app/data/uploads]
+services:
+  db:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-coalgov}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-coalgov}
+    volumes: [postgres:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, "yes"]
+    volumes: [redis:/data]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  migrate:
+    <<: *backend
+    command: [python, -m, app.migrate]
+    depends_on:
+      db: {condition: service_healthy}
+  backend:
+    <<: *backend
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+  worker:
+    <<: *backend
+    command: [python, -m, celery, -A, app.tasks.celery_app, worker, --loglevel=info, --concurrency=1]
+    depends_on:
+      backend: {condition: service_healthy}
+    restart: unless-stopped
+  scheduler:
+    <<: *backend
+    command: [python, -m, celery, -A, app.tasks.celery_app, beat, --loglevel=info, --schedule=/tmp/coalgov-beat]
+    depends_on:
+      backend: {condition: service_healthy}
+    restart: unless-stopped
+  web:
+    build: ./web
+    restart: unless-stopped
+  gateway:
+    image: nginx:1.27-alpine
+    ports: ["${APP_PORT:-8080}:80"]
+    volumes: [./gateway/nginx.conf:/etc/nginx/nginx.conf:ro]
+    depends_on:
+      backend: {condition: service_healthy}
+      web: {condition: service_started}
+    restart: unless-stopped
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    profiles: [monitoring]
+    volumes: [./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro, prometheus:/prometheus]
+    depends_on: [backend]
+  grafana:
+    image: grafana/grafana:11.6.0
+    profiles: [monitoring]
+    ports: ["127.0.0.1:3001:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes: [grafana:/var/lib/grafana, ./infra/grafana/provisioning:/etc/grafana/provisioning:ro]
+    depends_on: [prometheus]
+volumes:
+  postgres:
+  redis:
+  evidence:
+  prometheus:
+  grafana:

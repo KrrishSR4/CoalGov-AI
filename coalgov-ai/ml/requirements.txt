@@ -1,0 +1,5 @@
+-r ../backend/requirements.txt
+pandas>=2.2,<3
+xgboost>=2.1,<4
+shap>=0.46,<1
+joblib>=1.4,<2

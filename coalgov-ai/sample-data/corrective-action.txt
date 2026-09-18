@@ -1,0 +1,10 @@
+COALGOV AI - FICTIONAL DEMONSTRATION EVIDENCE
+
+Mine: North Pit (demo)
+Category: Ventilation
+Work: Damaged demonstration ventilation duct repaired and securely fastened.
+Inspection: Connections checked after completion.
+Date: 2026-09-14
+
+This file is sample evidence for testing the application workflow.
+It does not certify any real maintenance work or statutory compliance.

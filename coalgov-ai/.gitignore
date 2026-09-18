@@ -1,0 +1,16 @@
+**/node_modules/
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+**/.expo/
+**/dist/
+**/data/
+**/*.db
+**/*.db-*
+**/*.tsbuildinfo
+**/.env
+**/.env.local
+**/.sites-runtime/
+**/models/*.joblib
+backups/
+*.log
